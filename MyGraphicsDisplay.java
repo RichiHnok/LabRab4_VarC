@@ -34,7 +34,7 @@ public class MyGraphicsDisplay extends JPanel{
             BasicStroke.CAP_BUTT,
             BasicStroke.JOIN_ROUND,
             10.0f,
-            null,
+            new float[] {4*6,1*6,1*6,1*6,1*6,1*6,2*6,1*6,2*6},
             0.0f
         );
         axisStroke = new BasicStroke(
@@ -46,7 +46,7 @@ public class MyGraphicsDisplay extends JPanel{
             0.0f
         );
         markerStroke = new BasicStroke(
-            1.0f,
+            1.5f,
             BasicStroke.CAP_BUTT,
             BasicStroke.JOIN_MITER,
             10.0f,
@@ -97,7 +97,7 @@ public class MyGraphicsDisplay extends JPanel{
 
         for (int i = 0; i < graphicsData.length; i++) {
             Point2D.Double point = xyToPoint(graphicsData[i][0], graphicsData[i][1]);
-            if (i>0) {
+            if (i > 0) {
                 graphics.lineTo(point.getX(), point.getY());
             } else {
                 graphics.moveTo(point.getX(), point.getY());
@@ -165,17 +165,44 @@ public class MyGraphicsDisplay extends JPanel{
 
     protected void paintDots(Graphics2D canvas){
         canvas.setStroke(markerStroke);
-        canvas.setColor(Color.RED);
-        canvas.setPaint(Color.RED);
+        canvas.setColor(Color.BLACK);
+        // canvas.setPaint(Color.RED);
+        GeneralPath dot = new GeneralPath();
 
-        for(Double[] point: graphicsData){
-            Ellipse2D.Double marker = new Ellipse2D.Double();
-            Point2D.Double center = xyToPoint(point[0],point[1]);
-            Point2D.Double corner = shiftPoint(center,3,3);
-            marker.setFrameFromCenter(center, corner);
-            canvas.draw(marker);
-            canvas.fill(marker);
+        for(int i = 0; i < graphicsData.length; i++){
+            Point2D.Double point = xyToPoint(graphicsData[i][0], graphicsData[i][1]);
+
+            dot.moveTo(point.getX() + 5.5, point.getY());
+            dot.lineTo(point.getX() - 5.5, point.getY());
+            
+            dot.moveTo(point.getX(), point.getY() + 5.5);
+            dot.lineTo(point.getX(), point.getY() - 5.5);
+
+
+            dot.moveTo(point.getX() - 5.5, point.getY() - 5.5);
+            dot.lineTo(point.getX() + 5.5, point.getY() + 5.5);
+
+            dot.moveTo(point.getX() - 5.5, point.getY() + 5.5);
+            dot.lineTo(point.getX() + 5.5, point.getY() - 5.5);
         }
+        // Point2D.Double point = xyToPoint(graphicsData[3][0],  graphicsData[3][1]);
+
+        // // for(Double[] point: graphicsData){
+        // //     Ellipse2D.Double marker = new Ellipse2D.Double();
+                // Point2D.Double center = xyToPoint(point.getX(),point.getY());
+        // //     Point2D.Double corner = shiftPoint(center,11,11);
+        // //     marker.setFrameFromCenter(center, corner);
+        // //     canvas.draw(marker);
+        // //     // canvas.fill(marker);
+
+        //     // Point2D.Double start = xyToPoint(point[0], point[1]);
+        //     dot.moveTo(center.getX() + 20, center.getY());   
+        //     dot.lineTo(center.getX() - 20, center.getY());
+        //     dot.moveTo(center.getX() + 20, center.getY());   
+        //     // dot.lineTo(start.getX(), start.getY());
+        //     // dot.moveTo(start.getX() + 15, start.getY() - 5);
+        // // }
+        canvas.draw(dot);
     }
 
     public void paintComponent(Graphics g){
@@ -223,8 +250,10 @@ public class MyGraphicsDisplay extends JPanel{
             paintAxis(canvas);
         
         paintGraphics(canvas);
+
         if (showDots)
             paintDots(canvas);
+
         canvas.setFont(oldFont);
         canvas.setPaint(oldPaint);
         canvas.setColor(oldColor);
