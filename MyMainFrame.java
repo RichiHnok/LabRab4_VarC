@@ -32,6 +32,8 @@ public class MyMainFrame extends JFrame{
 
     private JMenuItem showAxisMenuItem;
     private JMenuItem showDotsMenuItem;
+    private JMenuItem showTestMenuItem;
+    private JMenuItem showIntegralsMenuItem;
     // private JMenuItem createGraphMenuItem;
 
     private JFileChooser fileChooser = null;
@@ -45,7 +47,7 @@ public class MyMainFrame extends JFrame{
         Toolkit kit = Toolkit.getDefaultToolkit();
         setSize(WIDTH, HEIGHT);
         setLocation((kit.getScreenSize().width - WIDTH)/2, (kit.getScreenSize().height - HEIGHT)/2);
-        setExtendedState(MAXIMIZED_BOTH);
+        // setExtendedState(MAXIMIZED_BOTH);
     //@ Реализация основного функционала программы
         //^ Меню
         JMenuBar menuBar = new JMenuBar();
@@ -96,6 +98,30 @@ public class MyMainFrame extends JFrame{
         showDotsMenuItem.setSelected(true);
         graphicsMenu.addMenuListener(new GraphicsMenuListener());
 
+        Action showTest = new AbstractAction("test"){
+            public void actionPerformed(ActionEvent event){
+                graphicsDisplay.showTest(showTestMenuItem.isSelected());
+            }
+        };
+
+        showTestMenuItem = new JCheckBoxMenuItem(showTest);
+        graphicsMenu.add(showTestMenuItem);
+
+        showTestMenuItem.setSelected(true);
+        graphicsMenu.addMenuListener(new GraphicsMenuListener());
+
+        Action showIntegrals = new AbstractAction("Интегралы"){
+            public void actionPerformed(ActionEvent event){
+                graphicsDisplay.setShowIntegrals(showIntegralsMenuItem.isSelected());
+            }
+        };
+
+        showIntegralsMenuItem = new JCheckBoxMenuItem(showIntegrals);
+        graphicsMenu.add(showIntegralsMenuItem);
+
+        showAxisMenuItem.setSelected(false);
+        graphicsMenu.addMenuListener(new GraphicsMenuListener());
+
         getContentPane().add(graphicsDisplay, BorderLayout.CENTER);
     //@
     }
@@ -104,6 +130,7 @@ public class MyMainFrame extends JFrame{
         public void menuSelected(MenuEvent event){
             showAxisMenuItem.setEnabled(fileLoaded);
             showDotsMenuItem.setEnabled(fileLoaded);
+            showTestMenuItem.setEnabled(fileLoaded);
         }
 
         public void menuDeselected(MenuEvent event){}
