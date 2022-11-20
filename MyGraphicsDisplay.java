@@ -8,6 +8,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.awt.geom.*;
+import java.text.DecimalFormat;;
 
 public class MyGraphicsDisplay extends JPanel{
 
@@ -161,8 +162,8 @@ public class MyGraphicsDisplay extends JPanel{
 
             Point2D.Double lineEnd = xyToPoint(maxX, 0);
             arrow.moveTo(lineEnd.getX(), lineEnd.getY());
-            arrow.lineTo(arrow.getCurrentPoint().getX() - 20, arrow.getCurrentPoint().getY() - 5);
-            arrow.lineTo(arrow.getCurrentPoint().getX(), arrow.getCurrentPoint().getY() + 20);
+            arrow.lineTo(arrow.getCurrentPoint().getX() - 20, arrow.getCurrentPoint().getY()-5);
+            arrow.lineTo(arrow.getCurrentPoint().getX(), arrow.getCurrentPoint().getY() + 10);
             arrow.closePath();
 
             canvas.draw(arrow);
@@ -244,21 +245,17 @@ public class MyGraphicsDisplay extends JPanel{
         Paint oldPaint = canvas.getPaint();
         Font oldFont = canvas.getFont();
 
-        if (showAxis)
-            paintAxis(canvas);
-        
-        paintGraphics(canvas);
-
-        if (showDots)
-            paintDots(canvas);
-        
         if(showTest)
             test(canvas);
 
-        // if(showIntegrals){
-        //     paintArea(canvas);
-        // }
+        if (showAxis)
+            paintAxis(canvas);
+        
+        paintGraphics(canvas);    
 
+        if (showDots)
+            paintDots(canvas);
+            
         canvas.setFont(oldFont);
         canvas.setPaint(oldPaint);
         canvas.setColor(oldColor);
@@ -267,201 +264,133 @@ public class MyGraphicsDisplay extends JPanel{
 
     public void test(Graphics2D canvas){
         canvas.setStroke(markerStroke);
-        canvas.setColor(Color.BLUE);
-        canvas.setPaint(Color.BLUE);
-
-        // GeneralPath areaToPaint = new GeneralPath();
-        // Point2D point = xyToPoint(graphicsData[5][0], graphicsData[5][1]);
-        // areaToPaint.moveTo(point.getX(), point.getY());
-        // areaToPaint.lineTo(point.getX() + 30, point.getY() + 30);
-        // areaToPaint.lineTo(point.getX(), point.getY() + 30);
-        // areaToPaint.closePath();
-        // canvas.draw(areaToPaint);
-        // canvas.fill(areaToPaint);
         
-        // System.out.println(graphicsData.length);
-        ArrayList<ArrayList<ArrayList<Double>>> pairs = new ArrayList<>();
-        pairs = findTransitionPairs();
-        // for(ArrayList<ArrayList<Double>> m: pairs){
-        //     System.out.println(m.toString());
-        // }
-        
+        ArrayList<Double> zeros = new ArrayList<>();
         ArrayList<ArrayList<Double>> pointsMinMax = new ArrayList<>();
-        pointsMinMax = findExtremePoints();
         
-        ArrayList<Double> zeros = new ArrayList<>();
-        zeros = findZeros(pairs);
-        
-        // if(zeros.size() < 2) return;
-        
-        int u = 0;
-        while(graphicsData[u][0] < pairs.get(0).get(1).get(0)){
-            u++;
-        }
-        // u++;
-        // System.out.println(u);
-
-        // double step = Math.abs(graphicsData[0][0]) - Math.abs(graphicsData[1][0]);
-
-        // ArrayList<GeneralPath> figures = new ArrayList<>();
-
-        for(int i = 0; i < pairs.size() - 1; i++){
-            // System.out.println(zeros.get(i) + ", " + zeros.get(i+1));
-            // int upperLine;
-            // if(pairs.get(i).get(0).get(1) < 0 ){
-            //     upperLine = 1;
-            // }else{
-            //     upperLine = -1;
-            // }            
-
-            GeneralPath ar = new GeneralPath();
-            Point2D point1 = xyToPoint(zeros.get(i), 0);
-            Point2D point2 = xyToPoint(zeros.get(i + 1), 0);
-            Point2D pointMM = xyToPoint(pointsMinMax.get(i).get(0), pointsMinMax.get(i).get(1));
-
-            ar.moveTo(point1.getX(), point1.getY());
-            // ar.lineTo(pointMM.getX(), pointMM.getY() + 10);
-            
-            while(graphicsData[u][0] < zeros.get(i+1)){
-                // area += upperLine*(graphicsData[u][1] + graphicsData[u+1][1])*step/2;
-                Point2D pnt = xyToPoint(graphicsData[u][0], graphicsData[u][1]);
-                ar.lineTo(pnt.getX(), pnt.getY());
-                u++;
-            }
-            ar.lineTo(point2.getX(), point2.getY());
-            // areaToPaint.lineTo(point.getX() - zeros.get(i+1), point.getY());
-            // ar.closePath();
-            canvas.draw(ar);
-            canvas.fill(ar);
-            // area += upperLine*part2OfStep*graphicsData[u][1]/2;
-        }
-    }
-    
-    public void paintArea(Graphics2D canvas){
-        canvas.setStroke(graphicsStroke);
-        canvas.setColor(Color.RED);
-        canvas.setPaint(Color.RED);
-        canvas.setFont(squareFont);
-        // ArrayList<ArrayList<Double>> transitions = new ArrayList<>();
-        ArrayList<ArrayList<ArrayList<Double>>> pairs = new ArrayList<>();
-        pairs = findTransitionPairs();
-        
-        ArrayList<ArrayList<Double>> pointsMinMax = new ArrayList<>();
-        pointsMinMax = findExtremePoints();
-        
-        ArrayList<Double> zeros = new ArrayList<>();
-        zeros = findZeros(pairs);
-        
-        if(zeros.size() < 2) return;
-        
-        int u = 0;
-        while(graphicsData[u][1] != pairs.get(0).get(1).get(1)){
-            u++;
-        }
-
-        double step = Math.abs(graphicsData[0][0]) - Math.abs(graphicsData[1][0]);
-
-        ArrayList<GeneralPath> figures = new ArrayList<>();
-
-        for(int i = 0; i < pairs.size() - 1; i++){
-            int upperLine;
-            if(pairs.get(i).get(0).get(1) < 0 ){
-                upperLine = 1;
-            }else{
-                upperLine = -1;
-            }
-
-            Double area = .0;
-            Double part1OfStep;
-            Double part2OfStep;
-            
-            part1OfStep = Math.abs(zeros.get(i) - graphicsData[u][0]);
-            part2OfStep = step - part1OfStep;
-            area += upperLine*part1OfStep*graphicsData[u][1]/2;
-
-
-            GeneralPath areaToPaint = new GeneralPath();
-            Point2D point = xyToPoint(zeros.get(i), 0);
-
-            areaToPaint.moveTo(point.getX() - zeros.get(i+1), point.getY());
-            areaToPaint.lineTo(point.getX(), point.getY());
-            
-            while(graphicsData[u+1][0] < zeros.get(i+1)){
-                area += upperLine*(graphicsData[u][1] + graphicsData[u+1][1])*step/2;
-                areaToPaint.lineTo(point.getX() + graphicsData[u][0], point.getY() + graphicsData[u][1]);
-                u++;
-            }
-            // areaToPaint.lineTo(point.getX() - zeros.get(i+1), point.getY());
-            areaToPaint.closePath();
-            figures.add(areaToPaint);
-            area += upperLine*part2OfStep*graphicsData[u][1]/2;
-        }
-    }
-
-    private ArrayList<Double> findZeros(ArrayList<ArrayList<ArrayList<Double>>> pairs){
-        ArrayList<Double> zeros = new ArrayList<>();
-        for(int i = 0; i < pairs.size(); i++){
-            Double x1;
-            x1 = pairs.get(i).get(0).get(0);
-            Double y1;
-            y1 = pairs.get(i).get(0).get(1);
-
-            Double x2;
-            x2 = pairs.get(i).get(1).get(0);
-            Double y2;
-            y2 = pairs.get(i).get(1).get(1);
-            
-            Double zero = (x1*(y1 - y2) - y1*(x1 - x2))/(y1 - y2);
-
-            zeros.add(zero);
-        }
-
-
-        return zeros;
-    }
-
-    private ArrayList<ArrayList<ArrayList<Double>>> findTransitionPairs(){
-        ArrayList<ArrayList<ArrayList<Double>>> pairs = new ArrayList<>();
-        // System.out.println(graphicsData.length);
-        // System.out.println(graphicsData[0].length);
         for(int i = 0; i < graphicsData.length - 1; i++){
-            // System.out.print(graphicsData[i][1] + "  " + graphicsData[i+1][1] + " 1| ");
+            if(graphicsData[i][1] == 0){
+                zeros.add(graphicsData[i][0]);
+                i++;
+                continue;
+            }
+
             if(graphicsData[i][1] / graphicsData[i+1][1] < 0){
                 
-                ArrayList<Double> point1 = new ArrayList<>();
-                point1.add(graphicsData[i][0]);
-                point1.add(graphicsData[i][1]);
-        //         System.out.print(point1.toString() + " 2| ");
-
-                ArrayList<Double> point2 = new ArrayList<>();
-                point2.add(graphicsData[i+1][0]);
-                point2.add(graphicsData[i+1][1]);
-        //         System.out.print(point2.toString() + " 3| ");
-
-                ArrayList<ArrayList<Double>> pair = new ArrayList<>();
-                pair.add(point1);
-                pair.add(point2);
-
-                pairs.add(pair);
+                Double x1;
+                x1 = graphicsData[i][0];
+                Double y1;
+                y1 = graphicsData[i][1];
+                Double x2;
+                x2 = graphicsData[i+1][0];
+                Double y2;
+                y2 = graphicsData[i+1][1];
+                
+                Double zero = (x1*(y1 - y2) - y1*(x1 - x2))/(y1 - y2);
+    
+                zeros.add(zero);
+                i++;
             }
-            // System.out.println();
         }
-        // System.out.println(pairs.toString());
-
-        return pairs;
-    }
-
-    private ArrayList<ArrayList<Double>> findExtremePoints(){
-        ArrayList<ArrayList<Double>> pointsMinMax = new ArrayList<>();
+        if(zeros.size() < 2) return;
+        
         for(int i = 1; i < graphicsData.length - 1; i++){
-            if(Math.abs(graphicsData[i][1]) > Math.abs(graphicsData[i-1][1]) && Math.abs(graphicsData[i][1]) > Math.abs(graphicsData[i+1][1])){
+            if(
+                Math.abs(graphicsData[i][1]) > Math.abs(graphicsData[i-1][1]) && 
+                Math.abs(graphicsData[i][1]) > Math.abs(graphicsData[i+1][1])
+                ){
                 ArrayList<Double> extr = new ArrayList<>();
                 extr.add(graphicsData[i][0]);
                 extr.add(graphicsData[i][1]);
                 pointsMinMax.add(extr);
             }
         }
+        
+        
+        int u = 0;
+        while(graphicsData[u][0] < zeros.get(0)) { u++; }
+        
+        Double step = Math.abs(graphicsData[0][0]) - Math.abs(graphicsData[1][0]);
+        // System.out.println("step:  " + step);
+        // System.out.println(zeros.size());
+        // System.out.println(zeros.toString());
 
-        return pointsMinMax;
+        // for(int i = 0; i < graphicsData.length; i++){
+        //     System.out.println(i+1 + ": " + graphicsData[i][0] + ", " + graphicsData[i][1]);
+        // }
+
+        for(int i = 0; i < zeros.size() - 1; i++){
+            canvas.setColor(Color.BLUE);
+            canvas.setPaint(Color.BLUE);
+            
+            Double area = .0;
+            Double part1OfStep;
+            Double part2OfStep;
+
+            if(graphicsData[u][1] == 0){u++;}
+            
+            // System.out.println(graphicsData[u-1][0] + "  " + zeros.get(i));
+            // System.out.println(graphicsData[u][0] + "  " + zeros.get(i));
+            // System.out.println(graphicsData[u+1][0] + "  " + zeros.get(i));
+            part1OfStep = Math.abs(zeros.get(i) - graphicsData[u][0]);
+            // System.out.println("1 шаг:  " + part1OfStep);
+            Double area1 = .0;
+            if(part1OfStep == 0){
+                area1 += Math.abs(step*graphicsData[u][1]/2);
+                // part2OfStep = step;
+            }else{
+                area1 += Math.abs(part1OfStep*graphicsData[u][1]/2);
+            }
+            // System.out.println(graphicsData[u+1][1]);
+            // System.out.println("Площадь левого огрызка: " + area1);
+            
+            
+            GeneralPath ar = new GeneralPath();
+            Point2D point1 = xyToPoint(zeros.get(i), 0);
+            Point2D point2 = xyToPoint(zeros.get(i + 1), 0);
+            Point2D pointMM = xyToPoint(pointsMinMax.get(i).get(0), pointsMinMax.get(i).get(1)/(3));
+            
+            ar.moveTo(point1.getX(), point1.getY());
+            
+            // int counter=1;
+            while(graphicsData[u][0] < zeros.get(i+1)){
+                if(graphicsData[u+1][0] > zeros.get(i+1)){
+                    Double area2 = .0;
+                    
+                    // System.out.println(graphicsData[u][0] + "  " + zeros.get(i+1));
+                    part2OfStep = Math.abs(graphicsData[u][0] - zeros.get(i+1));
+                    
+                    // System.out.println(graphicsData[u-1][0] + "  " + zeros.get(i+1));
+                    // System.out.println(graphicsData[u][0] + "  " + zeros.get(i+1));
+                    // System.out.println(graphicsData[u+1][0] + "  " + zeros.get(i+1));
+                    // System.out.println("2 шаг:  " + part2OfStep);
+                    
+                    if(part2OfStep == 0){
+                        area2 += Math.abs(step*graphicsData[u][1]/2);
+                    }else{
+                        area2 += Math.abs(part2OfStep*graphicsData[u][1]/2);
+                    }
+                    area += area2;
+                    break;
+                }
+                // System.out.println(counter++ + " " + Math.abs((graphicsData[u][1] + graphicsData[u+1][1]))*step/2);
+                area += Math.abs((graphicsData[u][1] + graphicsData[u+1][1]))*step/2;
+                Point2D pnt = xyToPoint(graphicsData[u][0], graphicsData[u][1]);
+                ar.lineTo(pnt.getX(), pnt.getY());
+                u++;
+            }
+            // System.out.println("\nостаточная площадь: " + area + "\n");
+            ar.lineTo(point2.getX(), point2.getY());
+            
+            area += area1;
+
+
+            canvas.draw(ar);
+            canvas.fill(ar);
+            canvas.setColor(Color.WHITE);
+            canvas.setPaint(Color.WHITE);
+            DecimalFormat df = new DecimalFormat("#.###");
+            canvas.drawString(df.format(area), (float)pointMM.getX() - 10, (float)pointMM.getY());
+        }
     }
 }
