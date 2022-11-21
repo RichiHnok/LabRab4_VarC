@@ -5,9 +5,9 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.Ellipse2D;
+// import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
-import java.awt.geom.*;
+// import java.awt.geom.*;
 import java.text.DecimalFormat;;
 
 public class MyGraphicsDisplay extends JPanel{
@@ -16,8 +16,8 @@ public class MyGraphicsDisplay extends JPanel{
 
     private boolean showAxis = true;
     private boolean showDots = true;
-    private boolean showTest = true;
     private boolean showIntegrals = false;
+    private boolean rotate = true;
 
     private double minX;
     private double minY;
@@ -31,7 +31,6 @@ public class MyGraphicsDisplay extends JPanel{
     private BasicStroke markerStroke;
     
     private Font axisFont;
-    private Font squareFont;
 
     public MyGraphicsDisplay(){
         setBackground(Color.WHITE);
@@ -52,7 +51,7 @@ public class MyGraphicsDisplay extends JPanel{
             0.0f
         );
         markerStroke = new BasicStroke(
-            3f,
+            1f,
             BasicStroke.CAP_BUTT,
             BasicStroke.JOIN_MITER,
             10.0f,
@@ -60,7 +59,7 @@ public class MyGraphicsDisplay extends JPanel{
             0.0f
         );
         axisFont = new Font("Serif", Font.BOLD, 36);
-        squareFont = new Font("Calibri", Font.BOLD, 36);
+        // squareFont = new Font("Calibri", Font.BOLD, 36);
     }
 
     public void showGraphics(Double[][] graphicsData){
@@ -78,39 +77,16 @@ public class MyGraphicsDisplay extends JPanel{
         repaint();
     }
 
-    public void showTest(boolean test){
-        this.showTest = test;
-        repaint();
-    }
-
     public void setShowIntegrals(boolean showIntegrals){
         this.showIntegrals = showIntegrals;
         repaint();
     }
 
-
-    protected Point2D.Double xyToPoint(double x, double y) {
-        double deltaX = x - minX;
-        double deltaY = maxY - y;
-        return new Point2D.Double(deltaX*scale, deltaY*scale);
-    }
-
-    protected Point2D.Double shiftPoint(Point2D.Double src, double deltaX, double deltaY) {
-        Point2D.Double dest = new Point2D.Double();
-        
-        dest.setLocation(src.getX() + deltaX, src.getY() + deltaY);
-        return dest;
-    }
-
+    
     protected void paintGraphics(Graphics2D canvas){
         canvas.setStroke(graphicsStroke);
         canvas.setColor(Color.RED);
         GeneralPath graphics = new GeneralPath();
-
-        // graphics.lineTo(
-        //     xyToPoint(graphicsData[0][0],graphicsData[0][1]).getX(),
-        //     xyToPoint(graphicsData[0][0], graphicsData[0][1]).getY()
-        // );
 
         for (int i = 0; i < graphicsData.length; i++) {
             Point2D.Double point = xyToPoint(graphicsData[i][0], graphicsData[i][1]);
@@ -121,10 +97,6 @@ public class MyGraphicsDisplay extends JPanel{
             }
         }
 
-        // for(int i = 0; i < graphicsData.length; i++){
-        //     Point2D.Double point = xyToPoint (graphicsData[i][0], graphicsData[i][1]);
-        //     graphics.moveTo(point.getX(), point.getY());
-        // }
         canvas.draw(graphics);
     }
 
@@ -204,37 +176,87 @@ public class MyGraphicsDisplay extends JPanel{
         }
         canvas.draw(dot);
     }
+    
+    protected Point2D.Double xyToPoint(double x, double y) {
+        double deltaX;
+        double deltaY;
+        if(!rotate){
+            deltaX = x - minX;
+            deltaY = maxY - y;
+        }else{
+            deltaX = (-1)*y - minX;
+            deltaY = maxY - x;
+        }
+        return new Point2D.Double(deltaX*scale, deltaY*scale);
+    }
+
+    // protected Point2D.Double shiftPoint(Point2D.Double src, double deltaX, double deltaY) {
+    //     Point2D.Double dest = new Point2D.Double();
+        
+    //     dest.setLocation(src.getX() + deltaX, src.getY() + deltaY);
+    //     return dest;
+    // }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         if (graphicsData==null || graphicsData.length==0)
             return;
-
-        minX = graphicsData[0][0];
-        maxX = graphicsData[graphicsData.length-1][0];
-        minY = graphicsData[0][1];
-        maxY = minY;
-        for (int i = 1; i < graphicsData.length; i++) {
-            if (graphicsData[i][1] < minY) {
-                minY = graphicsData[i][1];
+        // for(int i = 0; i < graphicsData.length; i++){
+        //     System.out.println(graphicsData[i][0] + "  " + graphicsData[i][1]);
+        // }
+        
+        if(!rotate){
+            minX = graphicsData[0][0];
+            maxX = graphicsData[graphicsData.length-1][0];
+            minY = graphicsData[0][1];
+            maxY = minY;
+            for (int i = 1; i < graphicsData.length; i++) {
+                if (graphicsData[i][1] < minY) {
+                    minY = graphicsData[i][1];
+                }
+                if (graphicsData[i][1] > maxY) {
+                    maxY = graphicsData[i][1];
+                }
             }
-            if (graphicsData[i][1] > maxY) {
-                maxY = graphicsData[i][1];
+        }else{
+            minX = -graphicsData[0][1];
+            maxX = minX;
+            minY = graphicsData[0][0];
+            maxY = graphicsData[graphicsData.length-1][0];
+            for (int i = 1; i < graphicsData.length; i++) {
+                if (-graphicsData[i][0] < minX) {
+                    minX = -graphicsData[i][0];
+                }
+                if (-graphicsData[i][1] > maxX) {
+                    maxX = -graphicsData[i][1];
+                }
             }
         }
 
-        double scaleX = getSize().getWidth() / (maxX - minX);
-        double scaleY = getSize().getHeight() / (maxY - minY);
+        // System.out.println("minX:  " + minX);
+        // System.out.println("minY:  " + minY);
+        // System.out.println("maxX:  " + maxX);
+        // System.out.println("maxY:  " + maxY);
+
+        double scaleX;
+        double scaleY;
+
+        scaleX = getSize().getWidth() / (maxX - minX);
+        scaleY = getSize().getHeight() / (maxY - minY);
         
         scale = Math.min(scaleX, scaleY);
         
         if (scale == scaleX) {
+            // System.out.println("МасштабX: " + scale);
             double yIncrement = (getSize().getHeight()/scale - (maxY -minY))/2;
-            maxY += yIncrement;
-            minY -= yIncrement;
+            // System.out.println("инкремент: " + yIncrement);
+                maxY += yIncrement;
+                minY -= yIncrement;
         }
-        if (scale==scaleY) {
+        if (scale == scaleY) {
+            // System.out.println("МасштабY: " + scale);
             double xIncrement = (getSize().getWidth()/scale - (maxX -minX))/2;
+            // System.out.println("инкремент: " + xIncrement);
             maxX += xIncrement;
             minX -= xIncrement;
         }
@@ -245,8 +267,8 @@ public class MyGraphicsDisplay extends JPanel{
         Paint oldPaint = canvas.getPaint();
         Font oldFont = canvas.getFont();
 
-        if(showTest)
-            test(canvas);
+        if(showIntegrals)
+            paintSquare(canvas);
 
         if (showAxis)
             paintAxis(canvas);
@@ -262,7 +284,7 @@ public class MyGraphicsDisplay extends JPanel{
         canvas.setStroke(oldStroke);    
     }
 
-    public void test(Graphics2D canvas){
+    public void paintSquare(Graphics2D canvas){
         canvas.setStroke(markerStroke);
         
         ArrayList<Double> zeros = new ArrayList<>();
@@ -311,39 +333,24 @@ public class MyGraphicsDisplay extends JPanel{
         while(graphicsData[u][0] < zeros.get(0)) { u++; }
         
         Double step = Math.abs(graphicsData[0][0]) - Math.abs(graphicsData[1][0]);
-        // System.out.println("step:  " + step);
-        // System.out.println(zeros.size());
-        // System.out.println(zeros.toString());
-
-        // for(int i = 0; i < graphicsData.length; i++){
-        //     System.out.println(i+1 + ": " + graphicsData[i][0] + ", " + graphicsData[i][1]);
-        // }
 
         for(int i = 0; i < zeros.size() - 1; i++){
             canvas.setColor(Color.BLUE);
             canvas.setPaint(Color.BLUE);
-            
             Double area = .0;
+            
             Double part1OfStep;
             Double part2OfStep;
 
             if(graphicsData[u][1] == 0){u++;}
             
-            // System.out.println(graphicsData[u-1][0] + "  " + zeros.get(i));
-            // System.out.println(graphicsData[u][0] + "  " + zeros.get(i));
-            // System.out.println(graphicsData[u+1][0] + "  " + zeros.get(i));
             part1OfStep = Math.abs(zeros.get(i) - graphicsData[u][0]);
-            // System.out.println("1 шаг:  " + part1OfStep);
             Double area1 = .0;
             if(part1OfStep == 0){
                 area1 += Math.abs(step*graphicsData[u][1]/2);
-                // part2OfStep = step;
             }else{
                 area1 += Math.abs(part1OfStep*graphicsData[u][1]/2);
-            }
-            // System.out.println(graphicsData[u+1][1]);
-            // System.out.println("Площадь левого огрызка: " + area1);
-            
+            }            
             
             GeneralPath ar = new GeneralPath();
             Point2D point1 = xyToPoint(zeros.get(i), 0);
@@ -352,18 +359,11 @@ public class MyGraphicsDisplay extends JPanel{
             
             ar.moveTo(point1.getX(), point1.getY());
             
-            // int counter=1;
             while(graphicsData[u][0] < zeros.get(i+1)){
                 if(graphicsData[u+1][0] > zeros.get(i+1)){
                     Double area2 = .0;
                     
-                    // System.out.println(graphicsData[u][0] + "  " + zeros.get(i+1));
                     part2OfStep = Math.abs(graphicsData[u][0] - zeros.get(i+1));
-                    
-                    // System.out.println(graphicsData[u-1][0] + "  " + zeros.get(i+1));
-                    // System.out.println(graphicsData[u][0] + "  " + zeros.get(i+1));
-                    // System.out.println(graphicsData[u+1][0] + "  " + zeros.get(i+1));
-                    // System.out.println("2 шаг:  " + part2OfStep);
                     
                     if(part2OfStep == 0){
                         area2 += Math.abs(step*graphicsData[u][1]/2);
@@ -373,17 +373,14 @@ public class MyGraphicsDisplay extends JPanel{
                     area += area2;
                     break;
                 }
-                // System.out.println(counter++ + " " + Math.abs((graphicsData[u][1] + graphicsData[u+1][1]))*step/2);
                 area += Math.abs((graphicsData[u][1] + graphicsData[u+1][1]))*step/2;
                 Point2D pnt = xyToPoint(graphicsData[u][0], graphicsData[u][1]);
                 ar.lineTo(pnt.getX(), pnt.getY());
                 u++;
             }
-            // System.out.println("\nостаточная площадь: " + area + "\n");
             ar.lineTo(point2.getX(), point2.getY());
             
             area += area1;
-
 
             canvas.draw(ar);
             canvas.fill(ar);
