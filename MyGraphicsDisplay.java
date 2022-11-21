@@ -31,6 +31,7 @@ public class MyGraphicsDisplay extends JPanel{
     private BasicStroke markerStroke;
     
     private Font axisFont;
+    private Font squareFont;
 
     public MyGraphicsDisplay(){
         setBackground(Color.WHITE);
@@ -58,8 +59,8 @@ public class MyGraphicsDisplay extends JPanel{
             null,
             0.0f
         );
-        axisFont = new Font("Serif", Font.BOLD, 36);
-        // squareFont = new Font("Calibri", Font.BOLD, 36);
+        axisFont = new Font("Serif", Font.BOLD, 16);
+        squareFont = new Font("Calibri", Font.PLAIN, 10);
     }
 
     public void showGraphics(Double[][] graphicsData){
@@ -112,10 +113,10 @@ public class MyGraphicsDisplay extends JPanel{
 
         FontRenderContext context = canvas.getFontRenderContext();
 
-        System.out.println("minX:  " + minX);
-        System.out.println("minY:  " + minY);
-        System.out.println("maxX:  " + maxX);
-        System.out.println("maxY:  " + maxY);
+        // System.out.println("minX:  " + minX);
+        // System.out.println("minY:  " + minY);
+        // System.out.println("maxX:  " + maxX);
+        // System.out.println("maxY:  " + maxY);
 
         Double beginOfY = .0;
         Double endOfY = .0;
@@ -142,10 +143,8 @@ public class MyGraphicsDisplay extends JPanel{
         }
 
         if(minX <= 0.0 && maxX >= 0.0){
-            // canvas.draw(new Line2D.Double(xyToPoint(0, maxY), xyToPoint(0, minY)));
             canvas.draw(new Line2D.Double(xyToPoint(0, beginOfY), xyToPoint(0, endOfY)));
-            // canvas.draw(new Line2D.Double(xyToPoint(5, 13), xyToPoint(5, 1)));
-            // canvas.draw(new Line2D.Double(xyToPoint(0, -minX), xyToPoint(0, maxX)));
+
             Point2D.Double lineEnd = xyToPoint(0, beginOfY);
             drawArrow(canvas, lineEnd, dirY);
             
@@ -156,25 +155,13 @@ public class MyGraphicsDisplay extends JPanel{
         }
         
         if(minY <= 0.0 && maxY >= 0){
-            // canvas.draw(new Line2D.Double(xyToPoint(minX, 0), xyToPoint(maxX, 0)));
             canvas.draw(new Line2D.Double(xyToPoint(beginOfX, 0), xyToPoint(endOfX, 0)));
 
             Point2D.Double lineEnd = xyToPoint(beginOfX, 0);
             drawArrow(canvas, lineEnd, dirX);
-            // arrow.moveTo(lineEnd.getX(), lineEnd.getY());
-            // arrow.lineTo(arrow.getCurrentPoint().getX() - 20, arrow.getCurrentPoint().getY()-5);
-            // arrow.lineTo(arrow.getCurrentPoint().getX(), arrow.getCurrentPoint().getY() + 10);
-            // arrow.closePath();
-
-            // canvas.draw(arrow);
-            // canvas.fill(arrow);
-
-            // Rectangle2D bounds = axisFont.getStringBounds("x", context);
             Point2D.Double labelPos = xyToPoint(beginOfX, 0);
 
             canvas.drawString("x", (float)labelPos.getX() - 25, (float)labelPos.getY() + 25);
-            // canvas.drawString("y", (float)labelPos.getX() + 10, (float)(labelPos.getY() - bounds.getY()));
-            // canvas.drawString("x", (float)(labelPos.getX() - bounds.getWidth() - 10),(float) (labelPos.getY() + bounds.getY()));
         }
     }
 
@@ -202,27 +189,57 @@ public class MyGraphicsDisplay extends JPanel{
 
     protected void paintDots(Graphics2D canvas){
         canvas.setStroke(markerStroke);
-        canvas.setColor(Color.BLACK);
-        // canvas.setPaint(Color.RED);
-        GeneralPath dot = new GeneralPath();
-
+        
+        
+        // for(int i = 0; i < graphicsData.length; i++){
+        //     System.out.println(graphicsData[i][1]);
+        // }
+        
         for(int i = 0; i < graphicsData.length; i++){
-            Point2D.Double point = xyToPoint(graphicsData[i][0], graphicsData[i][1]);
+            canvas.setColor(Color.YELLOW);
+            
+            double y = graphicsData[i][1];
+            Double a = Double.valueOf(y);
+            char[] chars = a.toString().toCharArray();
 
+            // for(int u = 0; u < 4 && u < chars.length; u++){
+            //     System.out.print(chars[u] + " ");
+            // }
+
+            for(int u = 0; u < 1 && u + 1 < chars.length; u++){
+                // System.out.print("u = " + chars[u] + "  " + chars[u+1] + "  " + chars[u+2] + "  ");
+                if(chars[u] == '.' || chars[u] == '-'){
+                    continue;
+                }
+                if(chars[u+1] == '.' && chars[u] > chars[u+2]){
+                    // System.out.print("Поставили чёрный");
+                    canvas.setColor(Color.BLACK);
+                    break;
+                }
+                if(chars[u] > chars[u+1]){
+                    // System.out.print("Поставили чёрный");
+                    canvas.setColor(Color.BLACK);
+                    break;
+                }
+            }
+
+            GeneralPath dot = new GeneralPath();
+            Point2D.Double point = xyToPoint(graphicsData[i][0], graphicsData[i][1]);
+            
             dot.moveTo(point.getX() + 5.5, point.getY());
             dot.lineTo(point.getX() - 5.5, point.getY());
             
             dot.moveTo(point.getX(), point.getY() + 5.5);
             dot.lineTo(point.getX(), point.getY() - 5.5);
-
-
+            
             dot.moveTo(point.getX() - 5.5, point.getY() - 5.5);
             dot.lineTo(point.getX() + 5.5, point.getY() + 5.5);
 
             dot.moveTo(point.getX() - 5.5, point.getY() + 5.5);
             dot.lineTo(point.getX() + 5.5, point.getY() - 5.5);
+            // System.out.println();
+            canvas.draw(dot);
         }
-        canvas.draw(dot);
     }
     
     protected Point2D.Double xyToPoint(double x, double y) {
@@ -238,20 +255,10 @@ public class MyGraphicsDisplay extends JPanel{
         return new Point2D.Double(deltaX*scale, deltaY*scale);
     }
 
-    // protected Point2D.Double shiftPoint(Point2D.Double src, double deltaX, double deltaY) {
-    //     Point2D.Double dest = new Point2D.Double();
-        
-    //     dest.setLocation(src.getX() + deltaX, src.getY() + deltaY);
-    //     return dest;
-    // }
-
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         if (graphicsData==null || graphicsData.length==0)
             return;
-        // for(int i = 0; i < graphicsData.length; i++){
-        //     System.out.println(graphicsData[i][0] + "  " + graphicsData[i][1]);
-        // }
         
         if(!showRotate){
             minX = graphicsData[0][0];
@@ -281,11 +288,6 @@ public class MyGraphicsDisplay extends JPanel{
             }
         }
 
-        // System.out.println("minX:  " + minX);
-        // System.out.println("minY:  " + minY);
-        // System.out.println("maxX:  " + maxX);
-        // System.out.println("maxY:  " + maxY);
-
         double scaleX;
         double scaleY;
 
@@ -295,16 +297,12 @@ public class MyGraphicsDisplay extends JPanel{
         scale = Math.min(scaleX, scaleY);
         
         if (scale == scaleX) {
-            // System.out.println("МасштабX: " + scale);
             double yIncrement = (getSize().getHeight()/scale - (maxY -minY))/2;
-            // System.out.println("инкремент: " + yIncrement);
                 maxY += yIncrement;
                 minY -= yIncrement;
         }
         if (scale == scaleY) {
-            // System.out.println("МасштабY: " + scale);
             double xIncrement = (getSize().getWidth()/scale - (maxX -minX))/2;
-            // System.out.println("инкремент: " + xIncrement);
             maxX += xIncrement;
             minX -= xIncrement;
         }
@@ -315,12 +313,12 @@ public class MyGraphicsDisplay extends JPanel{
         Paint oldPaint = canvas.getPaint();
         Font oldFont = canvas.getFont();
 
-        if(showIntegrals)
-            paintSquare(canvas);
-
         if (showAxis)
             paintAxis(canvas);
         
+        if(showIntegrals)
+            paintSquare(canvas);
+
         paintGraphics(canvas);    
 
         if (showDots)
@@ -334,6 +332,7 @@ public class MyGraphicsDisplay extends JPanel{
 
     public void paintSquare(Graphics2D canvas){
         canvas.setStroke(markerStroke);
+        canvas.setFont(squareFont);
         
         ArrayList<Double> zeros = new ArrayList<>();
         ArrayList<ArrayList<Double>> pointsMinMax = new ArrayList<>();
