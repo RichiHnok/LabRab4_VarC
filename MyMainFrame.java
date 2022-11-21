@@ -32,6 +32,7 @@ public class MyMainFrame extends JFrame{
     private JMenuItem showAxisMenuItem;
     private JMenuItem showDotsMenuItem;
     private JMenuItem showIntegralsMenuItem;
+    private JMenuItem showRotateMenuItem;
 
     private JFileChooser fileChooser = null;
     private boolean fileLoaded;
@@ -107,6 +108,18 @@ public class MyMainFrame extends JFrame{
         showIntegralsMenuItem.setSelected(false);
         graphicsMenu.addMenuListener(new GraphicsMenuListener());
 
+        Action showRotateAction = new AbstractAction("Поворот"){
+            public void actionPerformed(ActionEvent event){
+                graphicsDisplay.setShowRotate(showRotateMenuItem.isSelected());
+            }
+        };
+
+        showRotateMenuItem = new JCheckBoxMenuItem(showRotateAction);
+        graphicsMenu.add(showRotateMenuItem);
+
+        showRotateMenuItem.setSelected(false);
+        graphicsMenu.addMenuListener(new GraphicsMenuListener());
+
         getContentPane().add(graphicsDisplay, BorderLayout.CENTER);
     //@
     }
@@ -116,6 +129,7 @@ public class MyMainFrame extends JFrame{
             showAxisMenuItem.setEnabled(fileLoaded);
             showDotsMenuItem.setEnabled(fileLoaded);
             showIntegralsMenuItem.setEnabled(fileLoaded);
+            showRotateMenuItem.setEnabled(fileLoaded);
         }
 
         public void menuDeselected(MenuEvent event){}
