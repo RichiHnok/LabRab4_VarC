@@ -163,6 +163,9 @@ public class MyGraphicsDisplay extends JPanel{
 
             canvas.drawString("x", (float)labelPos.getX() - 25, (float)labelPos.getY() + 25);
         }
+
+        Point2D.Double center = xyToPoint(0, 0);
+        canvas.drawString("0", (float)center.getX() + 3, (float)center.getY() - 3);
     }
 
     private void drawArrow(Graphics2D canvas, Point2D.Double lineEnd, int direction){
@@ -206,7 +209,7 @@ public class MyGraphicsDisplay extends JPanel{
             //     System.out.print(chars[u] + " ");
             // }
 
-            for(int u = 0; u < 1 && u + 1 < chars.length; u++){
+            for(int u = 0; u < 4 && u + 1 < chars.length; u++){
                 // System.out.print("u = " + chars[u] + "  " + chars[u+1] + "  " + chars[u+2] + "  ");
                 if(chars[u] == '.' || chars[u] == '-'){
                     continue;
@@ -407,6 +410,8 @@ public class MyGraphicsDisplay extends JPanel{
             ar.moveTo(point1.getX(), point1.getY());
             
             while(graphicsData[u][0] < zeros.get(i+1)){
+                Point2D pnt = xyToPoint(graphicsData[u][0], graphicsData[u][1]);
+                ar.lineTo(pnt.getX(), pnt.getY());
                 if(graphicsData[u+1][0] > zeros.get(i+1)){
                     Double area2 = .0;
                     
@@ -421,8 +426,6 @@ public class MyGraphicsDisplay extends JPanel{
                     break;
                 }
                 area += Math.abs((graphicsData[u][1] + graphicsData[u+1][1]))*step/2;
-                Point2D pnt = xyToPoint(graphicsData[u][0], graphicsData[u][1]);
-                ar.lineTo(pnt.getX(), pnt.getY());
                 u++;
             }
             ar.lineTo(point2.getX(), point2.getY());

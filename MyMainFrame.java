@@ -120,6 +120,8 @@ public class MyMainFrame extends JFrame{
         showRotateMenuItem.setSelected(false);
         graphicsMenu.addMenuListener(new GraphicsMenuListener());
 
+        
+
         getContentPane().add(graphicsDisplay, BorderLayout.CENTER);
     //@
     }
